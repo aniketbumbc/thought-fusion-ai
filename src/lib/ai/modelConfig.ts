@@ -15,12 +15,12 @@ export const config = {
   },
   candidateModels: {
     openai: process.env.OPENAI_MODEL ?? 'gpt-5.5',
-    anthropic: process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-6',
+    anthropic: process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001',
     google: process.env.GOOGLE_MODEL ?? 'gemini-2.5-flash',
   },
-  synthesizerModel: process.env.SYNTHESIZER_MODEL ?? 'claude-opus-4-8',
+  synthesizerModel: process.env.SYNTHESIZER_MODEL ?? 'claude-sonnet-4-6',
   modelTimeoutMs: readModelTimeout(),
-  temperature: Number(process.env.MODEL_TEMPERATURE ?? 0.4),
+  temperature: Number(process.env.MODEL_TEMPERATURE ?? 1),
 } as const;
 
 export function availableCandidates(): ProviderId[] {

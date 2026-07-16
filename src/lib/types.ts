@@ -1,4 +1,4 @@
-import { ProviderId } from '../ai/model';
+import { ProviderId } from './ai/modelConfig';
 
 export type { ProviderId };
 
