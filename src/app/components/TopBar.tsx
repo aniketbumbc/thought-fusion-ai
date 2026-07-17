@@ -8,7 +8,10 @@ export function TopBar() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    // eslint-disable-next-line
+    setMounted(true)
+  },[]);
 
   const isDark = resolvedTheme === "dark";
 
@@ -19,9 +22,9 @@ export function TopBar() {
           className="size-[22px] rounded-md bg-brand"
           style={{ boxShadow: "0 0 0 3px var(--brand-glow)" }}
         />
-        <span className="text-sm font-semibold tracking-tight">Consensus</span>
+        <span className="text-sm font-semibold tracking-tight">Thought Fusion </span>
         <span className="text-xs font-medium text-muted-foreground">
-          self-consistency engine
+          self-thought engine
         </span>
       </div>
 

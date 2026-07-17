@@ -3,6 +3,7 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FinalPhase, GenerateResponse } from '../../lib/events';
 import { Markdown } from './Markdown';
+import { CopyButton } from './CopyButton';
 
 interface FinalAnswerProps {
   phase: FinalPhase;
@@ -58,6 +59,7 @@ export function FinalAnswer({
               consensus of {succeeded}
             </span>
           )}
+          {phase === "result" && answer && <CopyButton text={answer} />}
         </div>
 
         {/* waiting */}

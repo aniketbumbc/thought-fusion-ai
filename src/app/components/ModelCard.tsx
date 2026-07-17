@@ -10,10 +10,10 @@ import {
 } from "@/components/ui/collapsible";
 import { PROVIDER_DOT, type ModelView, type ProviderId } from '../../lib/events';
 import { Markdown } from './Markdown';
+import { CopyButton } from './CopyButton';
 
 interface ModelCardProps {
   model: ModelView;
-  onToggle: (provider: ProviderId) => void;
 }
 
 function fmtLatency(ms: number | null): string {
@@ -21,8 +21,8 @@ function fmtLatency(ms: number | null): string {
   return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
 }
 
-export function ModelCard({ model, onToggle }: ModelCardProps) {
-  const { provider, label, model: modelId, status, answer, error, latencyMs, expanded } = model;
+export function ModelCard({ model }: ModelCardProps) {
+  const { provider, label, model: modelId, status, answer, error, latencyMs } = model;
 
   // "Claude" from "Claude · claude-sonnet-4-6"
   const providerName = label.split("·")[0]?.trim() ?? provider;
@@ -43,7 +43,10 @@ export function ModelCard({ model, onToggle }: ModelCardProps) {
         </div>
 
         {status === "thinking" && (
-          <div className="size-3.5 flex-none animate-spin rounded-full border-2 border-border border-t-brand" />
+          <div
+            className="size-3.5 flex-none animate-spin rounded-full border-2 border-border"
+            style={{ borderTopColor: PROVIDER_DOT[provider] }}
+          />
         )}
 
         {status === "done" && (
@@ -57,6 +60,7 @@ export function ModelCard({ model, onToggle }: ModelCardProps) {
             <span className="flex size-4 items-center justify-center rounded-full bg-success-weak text-[10px] font-extrabold text-success">
               ✓
             </span>
+            {answer && <CopyButton text={answer} />}
           </div>
         )}
 
@@ -78,22 +82,11 @@ export function ModelCard({ model, onToggle }: ModelCardProps) {
         )}
 
         {status === "done" && answer && (
-          <Collapsible open={expanded} onOpenChange={() => onToggle(provider)}>
-            <CollapsibleTrigger className="flex items-center gap-1.5 text-[12.5px] font-semibold text-brand">
-              <span
-                className="inline-block text-[9px] transition-transform"
-                style={{ transform: expanded ? "rotate(90deg)" : "none" }}
-              >
-                ▶
-              </span>
-              {expanded ? "Hide answer" : "View answer"}
-            </CollapsibleTrigger>
-            <CollapsibleContent>
-              <Markdown className="mt-2.5 border-t border-border pt-2.5 text-[12.5px] text-text-soft">
+          <div> 
+             <Markdown className="mt-2.5 border-t border-border pt-2.5 text-[12.5px] text-text-soft">
                 {answer}
               </Markdown>
-            </CollapsibleContent>
-          </Collapsible>
+          </div>
         )}
 
         {status === "failed" && (
