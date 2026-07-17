@@ -3,7 +3,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Consensus — Self-Consistency Engine",
+  title: "Thought Fusion - Multi LLM Reasoner",
   description: "One question, three models in parallel, one reconciled answer.",
 };
 

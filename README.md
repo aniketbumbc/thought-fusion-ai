@@ -193,7 +193,7 @@ GOOGLE_API_KEY=
 # Candidate model IDs — VERIFY these in each provider's dashboard (they change often)
 OPENAI_MODEL=gpt-5.5
 ANTHROPIC_MODEL=claude-haiku-4-5-20251001
-GOOGLE_MODEL=gemini-2.5-flash
+GOOGLE_MODEL=gemini-3.1-flash-lite
 
 # Synthesizer — must be a Claude model; needs ANTHROPIC_API_KEY
 SYNTHESIZER_MODEL=claude-sonnet-4-6

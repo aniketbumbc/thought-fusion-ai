@@ -16,7 +16,7 @@ export const config = {
   candidateModels: {
     openai: process.env.OPENAI_MODEL ?? 'gpt-5.5',
     anthropic: process.env.ANTHROPIC_MODEL ?? 'claude-haiku-4-5-20251001',
-    google: process.env.GOOGLE_MODEL ?? 'gemini-2.5-flash',
+    google: process.env.GOOGLE_MODEL ?? 'gemini-3.1-flash-lite',
   },
   synthesizerModel: process.env.SYNTHESIZER_MODEL ?? 'claude-sonnet-4-6',
   modelTimeoutMs: readModelTimeout(),
