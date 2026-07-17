@@ -1,50 +1,51 @@
-import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { runSelfConsistency } from '../../../lib/orchestrator';
+import {
+  runSelfConsistency,
+  OrchestratorEvent,
+} from '../../../lib/orchestrator';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
-const inputSchema = z.object({
-  prompt: z
-    .string()
-    .trim()
-    .min(1, 'Prompt is required.')
-    .max(8000, 'Prompt is too long (max 8000 chars).'),
-});
+const BodySchema = z.object({ prompt: z.string().trim().min(1).max(8000) });
 
-export async function POST(req: Request) {
-  let json: unknown;
-  try {
-    json = await req.json();
-  } catch (err) {
-    return NextResponse.json(
-      { error: 'Request body must be valid JSON.' },
-      { status: 400 },
-    );
-  }
-  const parsed = inputSchema.safeParse(json);
-
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? 'Invalid request.' },
-      { status: 400 },
-    );
-  }
-
-  try {
-    const response = await runSelfConsistency(parsed.data.prompt);
-    return NextResponse.json(response, { status: 200 });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Internal error.';
-
-    return NextResponse.json({ error: message }, { status: 500 });
-  }
+function sse(event: string, data: unknown): string {
+  return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 }
 
-// health check endpoint
-export async function GET() {
-  return NextResponse.json({
-    ok: true,
-    endpoint: 'self-consistency /api/generate',
+export async function POST(req: Request) {
+  const parsed = BodySchema.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) {
+    return new Response(JSON.stringify({ error: 'Invalid prompt.' }), {
+      status: 400,
+    });
+  }
+
+  const encoder = new TextEncoder();
+  const stream = new ReadableStream({
+    async start(controller) {
+      const send = (event: string, data: unknown) =>
+        controller.enqueue(encoder.encode(sse(event, data)));
+      try {
+        const result = await runSelfConsistency(parsed.data.prompt, (e) =>
+          send(e.type, e),
+        );
+        send('final', result);
+      } catch (err) {
+        send('error', {
+          message: err instanceof Error ? err.message : 'Stream failed.',
+        });
+      } finally {
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+    },
   });
 }

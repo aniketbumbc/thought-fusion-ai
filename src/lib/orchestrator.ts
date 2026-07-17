@@ -13,6 +13,22 @@ import type {
   SynthesisResult,
 } from './types';
 
+import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { CANDIDATE_SYSTEM_PROMPT } from './ai/prompt';
+
+export type OrchestratorEvent =
+  | {
+      type: 'candidate_started';
+      provider: ProviderId;
+      label: string;
+      model: string;
+    }
+  | { type: 'candidate_done'; candidate: CandidateResult }
+  | { type: 'synthesis_started'; usedProviders: ProviderId[] }
+  | { type: 'synthesis_done'; synthesis: SynthesisResult };
+
+type Emit = (e: OrchestratorEvent) => void;
+
 function messageToText(content: unknown): string {
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
@@ -37,14 +53,19 @@ function errorMessage(err: unknown): string {
 async function runCandidate(
   provider: ProviderId,
   prompt: string,
+  emit: Emit,
 ): Promise<CandidateResult> {
   const started = Date.now();
   const { label, model, llm } = makeCandidate(provider);
+  emit({ type: 'candidate_started', provider, label, model });
   try {
-    const res = await llm.invoke(prompt, {
-      signal: AbortSignal.timeout(config.modelTimeoutMs), // timeout the request if it takes too long
-    });
-    return {
+    const res = await llm.invoke(
+      [new SystemMessage(CANDIDATE_SYSTEM_PROMPT), new HumanMessage(prompt)],
+      {
+        signal: AbortSignal.timeout(config.modelTimeoutMs),
+      },
+    );
+    const candidate: CandidateResult = {
       provider,
       label,
       model,
@@ -53,8 +74,10 @@ async function runCandidate(
       error: null,
       latencyMs: Date.now() - started,
     };
+    emit({ type: 'candidate_done', candidate });
+    return candidate;
   } catch (err) {
-    return {
+    const candidate: CandidateResult = {
       provider,
       label,
       model,
@@ -63,6 +86,8 @@ async function runCandidate(
       error: errorMessage(err),
       latencyMs: Date.now() - started,
     };
+    emit({ type: 'candidate_done', candidate });
+    return candidate;
   }
 }
 
@@ -88,6 +113,7 @@ async function synthesize(
 
 export async function runSelfConsistency(
   prompt: string,
+  emit: Emit = () => {},
 ): Promise<GenerateResponse> {
   const started = Date.now();
   const providers = availableCandidates(); //get the available LLM models
@@ -107,7 +133,7 @@ export async function runSelfConsistency(
   }
 
   const settled = await Promise.allSettled(
-    providers.map((p) => runCandidate(p, prompt)), // run the candidates in parallel each Model will run in parallel
+    providers.map((p) => runCandidate(p, prompt, emit)), // run the candidates in parallel each Model will run in parallel
   );
 
   // map the results to the candidates
@@ -139,8 +165,13 @@ export async function runSelfConsistency(
     synthesisSkippedReason =
       'Synthesis requires an Anthropic API key (ANTHROPIC_API_KEY).';
   } else {
+    emit({
+      type: 'synthesis_started',
+      usedProviders: results.map((c) => c.provider),
+    });
     try {
       synthesis = await synthesize(prompt, results); // final llm call to synthesize the answers
+      emit({ type: 'synthesis_done', synthesis });
     } catch (err) {
       synthesisSkippedReason = `Synthesis failed: ${errorMessage(err)}`;
     }
