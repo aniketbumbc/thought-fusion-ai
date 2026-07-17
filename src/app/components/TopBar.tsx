@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useTheme } from "next-themes";
-import { BrainCircuit } from "lucide-react";
+import { BrainCircuit, BookText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function TopBar() {
@@ -31,15 +32,27 @@ export function TopBar() {
         </span>
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => setTheme(isDark ? "light" : "dark")}
-        className="gap-2 text-xs font-semibold text-muted-foreground"
-      >
-        <span className="size-2 rounded-full bg-brand" />
-        {mounted ? (isDark ? "Dark" : "Light") : "Theme"}
-      </Button>
+      <div className="flex items-center gap-2">
+        <Button
+          render={<Link href="/docs" />}
+          variant="outline"
+          size="sm"
+          className="gap-2 text-xs font-semibold text-muted-foreground"
+        >
+          <BookText className="size-3.5" />
+          Docs
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+          className="gap-2 text-xs font-semibold text-muted-foreground"
+        >
+          <span className="size-2 rounded-full bg-brand" />
+          {mounted ? (isDark ? "Dark" : "Light") : "Theme"}
+        </Button>
+      </div>
     </div>
   );
 }
