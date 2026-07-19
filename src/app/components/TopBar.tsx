@@ -19,9 +19,9 @@ export function TopBar() {
 
   return (
     <div className="flex items-center justify-between py-5">
-      <div className="flex items-center gap-2.5">
+      <Link href="/" className="flex items-center gap-2.5">
         <span
-          className="flex size-9 items-center justify-center rounded-md bg-brand"
+          className="flex size-9 cursor-pointer items-center justify-center rounded-md bg-brand"
           style={{ boxShadow: "0 0 0 3px var(--brand-glow)" }}
         >
           <BrainCircuit className="size-5 text-white" strokeWidth={2.5} />
@@ -30,11 +30,12 @@ export function TopBar() {
         <span className="text-sm font-medium text-muted-foreground">
           Multi LLM Reasoner
         </span>
-      </div>
+      </Link>
 
       <div className="flex items-center gap-2">
         <Button
           render={<Link href="/docs" />}
+          nativeButton={false}
           variant="outline"
           size="sm"
           className="gap-2 text-xs font-semibold text-muted-foreground"
@@ -47,7 +48,7 @@ export function TopBar() {
           variant="outline"
           size="sm"
           onClick={() => setTheme(isDark ? "light" : "dark")}
-          className="gap-2 text-xs font-semibold text-muted-foreground"
+          className="cursor-pointer gap-2 text-xs font-semibold text-muted-foreground"
         >
           <span className="size-2 rounded-full bg-brand" />
           {mounted ? (isDark ? "Dark" : "Light") : "Theme"}
