@@ -23,8 +23,8 @@ export function PromptForm({ onGenerate, running, variant = "hero" }: PromptForm
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Cmd/Ctrl + Enter submits; plain Enter keeps newlines.
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    // Enter submits; Shift+Enter keeps newlines.
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submit();
     }

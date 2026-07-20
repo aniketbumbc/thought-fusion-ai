@@ -1,8 +1,5 @@
 import { z } from 'zod';
-import {
-  runSelfConsistency,
-  OrchestratorEvent,
-} from '../../../lib/orchestrator';
+import { runSelfConsistency } from '../../../lib/orchestrator';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
